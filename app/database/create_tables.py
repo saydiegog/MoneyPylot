@@ -1,9 +1,9 @@
 import sqlite3
 from pathlib import Path
+import os
 
-# Path to the SQLite database file
-DB_PATH = Path(__file__).resolve().parent / "moneypylot.db"
-
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "moneypylot.db")
 
 def create_tables():
     """Creates all required tables for the MVP of MoneyPylot."""

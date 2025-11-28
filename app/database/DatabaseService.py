@@ -15,6 +15,7 @@ class DatabaseService:
         
     # Method to execute INSERT, UPDATE, DELETE
     def execute_query(self, query, params=None):
+        conn = None
         try:
             conn = self._connect()  # opens DB connection
             cursor = conn.cursor()  # creates cursor for DB operations
@@ -28,6 +29,7 @@ class DatabaseService:
 
     # Method that returns only one row
     def fetch_one(self, query, params=None):
+        conn = None
         try:
             conn = self._connect()  # opens DB connection
             cursor = conn.cursor()
@@ -46,6 +48,7 @@ class DatabaseService:
 
     # Method that returns all rows from a query
     def fetch_all(self, query, params=None):
+        conn = None
         try:
             conn = self._connect()
             cursor = conn.cursor()
