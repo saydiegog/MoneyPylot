@@ -63,7 +63,7 @@ class SubCategoryService:
     
     # Delete a subcategory
     def delete_subcategory(self, subcategory_id):
-        
+
         if not self.get_subcategory_by_id(subcategory_id):
             print(f"Error: SubCategory ID {subcategory_id} does not exist.")
             return False
@@ -73,3 +73,12 @@ class SubCategoryService:
 
         print(f"SubCategory ID {subcategory_id} deleted.")
         return True
+
+    #Get subcategories from a category
+    def get_subcategories_by_category(self, category_id):
+        query = "SELECT id, category_id, name FROM subcategories WHERE category_id = ? ORDER BY name"
+        rows = self.db.fetch_all(query, (category_id,))
+        return [
+            SubCategory(id=row[0], category_id=row[1], name=row[2]) 
+            for row in rows
+        ]

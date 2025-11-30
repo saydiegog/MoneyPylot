@@ -1,63 +1,49 @@
 # main.py
-# Entry point for the MoneyPylot application.
-# Handles database initialization and simple console menu.
+# Clean, organized CLI for MoneyPylot.
 
 import os
 from app.database.create_tables import create_tables
 from app.database.DatabaseService import DatabaseService
 from app.services.CategoryService import CategoryService
 from app.services.SubCategoryService import SubCategoryService
+from app.services.IncomeService import IncomeService
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))  
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "app", "database", "moneypylot.db")
 
 
-def initialize_database():
-    """
-    Ensures that the database file and tables exist.
-    If the file does not exist, it is created.
-    Tables are always validated using CREATE TABLE IF NOT EXISTS.
-    """
-    db_exists = os.path.exists(DB_PATH)
+# ------------------------------------------------------------
+#   DATABASE INIT
+# ------------------------------------------------------------
 
-    if not db_exists:
-        print("[INFO] Database not found. Creating new database...")
-        # this will create and initialize the DB
+def initialize_database():
+    if not os.path.exists(DB_PATH):
+        print("[INFO] Database not found. Creating new one...")
         create_tables()
     else:
-        print("[INFO] Database found.")
-        print("[INFO] Validating table structure...")
-        # validate tables (CREATE IF NOT EXISTS)
+        print("[INFO] Database found. Validating tables...")
         create_tables()
 
-    print("[INFO] Database initialization complete.")
+    print("[INFO] Database ready.\n")
 
 
-def print_menu():
-    print("\n=== Expense Tracker CLI ===")
-    print("1. Create Category")
-    print("2. List Categories")
-    print("3. Update Category")
-    print("4. Delete Category")
-    print("--------------------------------")
-    print("5. Create SubCategory")
-    print("6. List SubCategories")
-    print("7. Update SubCategory")
-    print("8. Delete SubCategory")
-    print("--------------------------------")
-    print("0. Exit")
-    print("===============================")
+# ------------------------------------------------------------
+#   SUBMENUS
+# ------------------------------------------------------------
 
-def main():
-
+def menu_categories():
     while True:
-        print_menu()
-        choice = input("Select option: ")
-
-        # -------------------- CATEGORIES --------------------
+        print("\n=== CATEGORIES MENU ===")
+        print("1. Create Category")
+        print("2. List Categories")
+        print("3. Update Category")
+        print("4. Delete Category")
+        print("5. View Subcategories of a Category")
+        print("0. Back")
+        choice = input("Select: ")
 
         if choice == "1":
-            name = input("Enter category name: ")
+            name = input("Category name: ")
             category_service.create_category(name)
 
         elif choice == "2":
@@ -67,69 +53,143 @@ def main():
                 print(f"[{c.id}] {c.name}")
 
         elif choice == "3":
-            cat_id = input("Enter category ID to update: ")
-            new_name = input("Enter new name: ")
-            category_service.update_category(cat_id, new_name)
+            cid = input("Category ID: ")
+            new = input("New name: ")
+            category_service.update_category(cid, new)
 
         elif choice == "4":
-            cat_id = input("Enter category ID to delete: ")
-            category_service.delete_category(cat_id)
-
-        # -------------------- SUBCATEGORIES --------------------
+            cid = input("Category ID to delete: ")
+            category_service.delete_category(cid)
 
         elif choice == "5":
-            print("\n=== CREATE SUBCATEGORY ===")
-            name = input("Subcategory name: ")
-            category_id = input("Enter category ID it belongs to: ")
-
-            subcategory_service.create_subcategory(name, category_id)
-
-        elif choice == "6":
+            cid = input("Enter category ID: ")
+            subs = subcategory_service.get_subcategories_by_category(cid)
             print("\n=== SUBCATEGORIES ===")
-            subcategories = subcategory_service.get_all_subcategories()
-            for s in subcategories:
-                print(f"[{s.id}] {s.name} (Category ID: {s.category_id})")
-
-        elif choice == "7":
-            print("\n=== UPDATE SUBCATEGORY ===")
-            sub_id = input("Enter subcategory ID: ")
-            new_name = input("New name: ")
-
-            subcategory_service.update_subcategory(sub_id, new_name)
-
-        elif choice == "8":
-            print("\n=== DELETE SUBCATEGORY ===")
-            sub_id = input("Enter subcategory ID: ")
-            subcategory_service.delete_subcategory(sub_id)
-
-        # -------------------- EXIT --------------------
+            for s in subs:
+                print(f"[{s.id}] {s.name}")
+            if not subs:
+                print("No subcategories found.")
 
         elif choice == "0":
-            print("Exiting program...")
-            break
+            return
 
         else:
-            print("Invalid option. Try again.")
+            print("Invalid option.")
 
+
+def menu_subcategories():
+    while True:
+        print("\n=== SUBCATEGORIES MENU ===")
+        print("1. Create SubCategory")
+        print("2. List All SubCategories")
+        print("3. Update SubCategory")
+        print("4. Delete SubCategory")
+        print("0. Back")
+        choice = input("Select: ")
+
+        if choice == "1":
+            name = input("Subcategory name: ")
+            cid = input("Category ID: ")
+            subcategory_service.create_subcategory(name, cid)
+
+        elif choice == "2":
+            subs = subcategory_service.get_all_subcategories()
+            for s in subs:
+                print(f"[{s.id}] {s.name} (Category {s.category_id})")
+
+        elif choice == "3":
+            sid = input("Subcategory ID: ")
+            nn = input("New name: ")
+            subcategory_service.update_subcategory(sid, nn)
+
+        elif choice == "4":
+            sid = input("Subcategory ID: ")
+            subcategory_service.delete_subcategory(sid)
+
+        elif choice == "0":
+            return
+
+        else:
+            print("Invalid option.")
+
+
+def menu_income():
+    while True:
+        print("\n=== INCOME MENU ===")
+        print("1. Create Income")
+        print("2. List All Incomes")
+        print("3. Update Income")
+        print("4. Delete Income")
+        print("0. Back")
+        choice = input("Select: ")
+
+        if choice == "1":
+            name = input("Income name: ")
+            amount = float(input("Amount: "))
+            recur = int(input("Recurring? (1 yes, 0 no): "))
+            income_service.create_income(name, amount, recur)
+
+        elif choice == "2":
+            incomes = income_service.get_all_incomes()
+            print("\n=== INCOME ===")
+            for i in incomes:
+                print(f"[{i.id}] {i.name} - ${i.amount} | recurring={i.is_recurring}")
+
+        elif choice == "3":
+            iid = input("Income ID: ")
+            new = input("New name: ")
+            amt = float(input("New amount: "))
+            income_service.update_income(iid, new, amt)
+
+        elif choice == "4":
+            iid = input("Income ID: ")
+            income_service.delete_income(iid)
+
+        elif choice == "0":
+            return
+
+        else:
+            print("Invalid option.")
+
+
+# ------------------------------------------------------------
+#   MAIN MENU
+# ------------------------------------------------------------
+
+def main():
+    while True:
+        print("\n=== MoneyPylot CLI v0.0.3 ===")
+        print("1. Categories")
+        print("2. SubCategories")
+        print("3. Income")
+        print("0. Exit")
+        choice = input("Select option: ")
+
+        if choice == "1":
+            menu_categories()
+        elif choice == "2":
+            menu_subcategories()
+        elif choice == "3":
+            menu_income()
+        elif choice == "0":
+            print("Goodbye!")
+            break
+        else:
+            print("Invalid option.")
+
+
+# ------------------------------------------------------------
+#   ENTRY POINT
+# ------------------------------------------------------------
 
 if __name__ == "__main__":
-    print("=== MoneyPylot v0.0.2 ===")
-    print("=== DEBUG PATH CHECK ===")
-    print("Base dir:", BASE_DIR)
-    print("DB_PATH:", DB_PATH)
-    print("Exists?:", os.path.exists(DB_PATH))
-    print("========================")
-
-
-    # Step 1: Initialize DB and tables
     initialize_database()
 
-    # Step 2: Create database service
     db = DatabaseService(DB_PATH)
 
-    # Step 3: Initialize services
+    # Services
     category_service = CategoryService(db)
     subcategory_service = SubCategoryService(db)
+    income_service = IncomeService(db)
 
-    # Step 4: Start menu loop
     main()
