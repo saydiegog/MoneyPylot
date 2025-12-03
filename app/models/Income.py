@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 class Income:
     def __init__(self, id, name, amount, is_recurring, created_at):

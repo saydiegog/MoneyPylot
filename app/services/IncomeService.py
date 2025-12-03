@@ -1,5 +1,5 @@
 from app.models.Income import Income
-import datetime
+from datetime import datetime
 
 class IncomeService:
     # Constructor method
